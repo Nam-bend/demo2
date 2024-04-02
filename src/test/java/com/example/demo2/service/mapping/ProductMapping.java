@@ -12,6 +12,7 @@ public class ProductMapping {
         entity.setPrice(dto.getPrice());
         entity.setUrl(dto.getUrl());
         return entity;
+
         // chuyển dữ liệu từ dto sang Entity nhập dữ liệu
         // của entity(set) qua việc lấy dữ liệu từ dto (get)
         // rồi trả về entity với dữ liệu đã có
