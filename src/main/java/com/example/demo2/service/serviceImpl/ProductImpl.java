@@ -113,5 +113,17 @@ public class ProductImpl implements ProductService {
         }
     }
 
-}
+    @Override
+    public Page<ProductResponse> getAllProductsFiltered(Pageable pageable, String filter) {
+            try {
+                // Thực hiện lọc sản phẩm dựa trên filter
+                Page<Product> products = productRepository.findByProductNameContainingIgnoreCase(filter, pageable);
+                // Ánh xạ các đối tượng ProductEntity sang ProductResponse
+                return products.map(ProductMapping::entityToDto);
+            } catch (Exception e) {
+                LOGGER.error("Failed to fetch products with filter: {}", e.getMessage(), e);
+                throw new CustomException("Failed to fetch products with filter: " + e.getMessage());
+            }
+        }
+    }
 
