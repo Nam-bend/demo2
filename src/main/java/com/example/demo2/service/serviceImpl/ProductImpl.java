@@ -8,6 +8,11 @@ import com.example.demo2.exception.ProductNotFoundException;
 import com.example.demo2.repository.ProductRepository;
 import com.example.demo2.service.ProductService;
 import com.example.demo2.service.mapping.ProductMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,6 +21,7 @@ import java.util.List;
 @Service
 public class ProductImpl implements ProductService {
     private final ProductRepository productRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductImpl.class);
 
     public ProductImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -38,6 +44,26 @@ public class ProductImpl implements ProductService {
         // hoặc có thể dùng stream
         //  product.stream().map(ProductMapping::entityToDto).collect(Collectors.toList());
     }
+
+    @Override
+    public Page<ProductResponse> getAllProductsPaged(Pageable pageable) {
+        LOGGER.info("== START Fetching all products with pagination ==");
+        try {
+            Page<Product> productsPage = productRepository.findAll(pageable);
+            List<ProductResponse> responseList = new ArrayList<>();
+            for (Product product : productsPage.getContent()) {
+                ProductResponse response = ProductMapping.entityToDto(product);
+                responseList.add(response);
+            }
+            LOGGER.info("== SUCCESS Fetching and mapping all products ==");
+            return new PageImpl<>(responseList, pageable, productsPage.getTotalElements());
+        } catch (Exception e) {
+            LOGGER.error("== ERROR Failed to fetch products: {}", e.getMessage(), e);
+            throw new CustomException("Failed to fetch products: " + e.getMessage());
+        }
+    }
+
+
 
     @Override
     public ProductResponse getProductById(Long id) {
